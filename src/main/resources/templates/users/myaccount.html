@@ -34,21 +34,12 @@
 								<input type="hidden" th:field="*{role}" />
 								<div class="row">
 									<div class="col-sm-6 b-r">
-										<div th:classappend="${#fields.hasErrors('firstName')} ? has-error" class="form-group">
-											<label class="col-sm-3 control-label">Ime <span class="required-field">*</span> </label>
+										<div th:classappend="${#fields.hasErrors('name')} ? has-error" class="form-group">
+											<label class="col-sm-3 control-label">Ime i prezime<span class="required-field">*</span> </label>
 											<div class="col-sm-9">
-												<input th:field="*{firstName}" type="text" class="form-control" th:maxlength="45"/>
-												<label th:if="${#fields.hasErrors('firstName')}" class="control-label" for="firstName">
-													<i class="fa fa-times-circle-o"></i> <span th:errors="*{firstName}">Required</span>
-												</label>
-											</div>
-										</div>
-										<div th:classappend="${#fields.hasErrors('lastName')} ? has-error" class="form-group">
-											<label class="col-sm-3 control-label">Prezime <span class="required-field">*</span> </label>
-											<div class="col-sm-9">
-												<input th:field="*{lastName}" type="text" class="form-control" th:maxlength="45"/>
-												<label th:if="${#fields.hasErrors('lastName')}" class="control-label" for="lastName">
-													<i class="fa fa-times-circle-o"></i> <span th:errors="*{lastName}">Required</span>
+												<input th:field="*{name}" type="text" class="form-control" th:maxlength="100"/>
+												<label th:if="${#fields.hasErrors('name')}" class="control-label" for="name">
+													<i class="fa fa-times-circle-o"></i> <span th:errors="*{name}">Required</span>
 												</label>
 											</div>
 										</div>
