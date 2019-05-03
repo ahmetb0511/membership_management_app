@@ -14,7 +14,7 @@ import javax.persistence.Table;
 import com.mma.common.enums.UnitEnums.Status;
 
 @Entity
-@Table(name = "unit")
+@Table(name = "unit", schema = "heroku_538c076711f1b9b")
 public class Unit {
 
 	@Id

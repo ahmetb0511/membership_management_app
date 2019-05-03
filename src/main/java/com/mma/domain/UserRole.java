@@ -8,7 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "user_role")
+@Table(name = "user_role", schema = "heroku_538c076711f1b9b")
 public class UserRole {
 	
 	@Id
