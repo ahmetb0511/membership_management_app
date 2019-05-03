@@ -1,0 +1,17 @@
+logging:
+  level:
+    com.mma: debug
+    org.hibernate.SQL: debug
+    
+spring:
+  datasource:
+    driverClassName: com.mysql.jdbc.Driver
+    url: ${JDBC_DATABASE_URL}
+    username: ${JDBC_DATABASE_USERNAME}
+    password: ${JDBC_DATABASE_PASSWORD}
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    protocol: smtp
+    username: mma@gmail.com
+    password: mma_sifra

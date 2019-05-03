@@ -14,7 +14,7 @@ import javax.persistence.Table;
 import com.mma.common.enums.UserEnums.Category;
 
 @Entity
-@Table(name = "user_right", schema = "heroku_538c076711f1b9b")
+@Table(name = "user_right")
 public class UserRight {
 
 	@Id
