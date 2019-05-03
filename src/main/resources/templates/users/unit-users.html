@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en"
+	xmlns="http://www.w3.org/1999/xhtml" 
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" 
+	layout:decorator="layout">
+
+	<body layout:fragment="ui-body">
+		<div class="row wrapper border-bottom white-bg page-heading">
+			<div class="col-lg-12">
+				<h2>Korisnici</h2>
+			</div>
+		</div>
+		<div class="wrapper wrapper-content">			
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="ibox float-e-margins">
+						<div class="ibox-title">
+							<h5>Korisnici</h5>
+						</div>
+						<div class="ibox-content">
+							<table class="table table-striped dataTables-users">
+								<thead>
+									<tr>
+										<th>&nbsp;</th>
+										<th>Ime i prezime</th>
+										<th>E-mail</th>
+										<th class="text-center">Status</th>
+										<th class="text-right">Akcije</th>
+									</tr>
+								</thead>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>		
+		</div>
+		
+		<!--Confirmation Delete dialog -->
+		<div class="modal inmodal fade" id="modalDelete" tabindex="-1" role="dialog"  aria-hidden="true">
+			<div class="modal-dialog modal-sm">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Zatvori</span></button>
+						<h4 class="modal-title">Obriši korisnika</h4>
+					</div>
+					<div class="modal-body">
+						<p class="modal-message">Da li ste sigurni da želite obrisati označenog korisnika?</p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-white" data-dismiss="modal">Otkaži</button>
+						<button id="confirmButton" type="button" class="btn btn-danger">Da, obriši</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!--Confirmation Disable dialog -->
+		<div class="modal inmodal fade" id="modalDisable" tabindex="-1" role="dialog"  aria-hidden="true">
+			<div class="modal-dialog modal-sm">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Zatvori</span></button>
+						<h4 class="modal-title">Blokiraj korisnika</h4>
+					</div>
+					<div class="modal-body">
+						<p class="modal-message">Da li ste sigurni da želite blokirati označenog korisnika?</p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-white" data-dismiss="modal">Otkaži</button>
+						<button id="confirmButton" type="button" class="btn btn-warning">Da, blokiraj</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!--Change password dialog -->
+		<div class="modal inmodal fade" id="modalChangePassword" tabindex="-1" role="dialog"  aria-hidden="true">
+			<div class="modal-dialog modal-sm">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Zatvori</span></button>
+						<h4 class="modal-title">Promijeni šifru</h4>
+					</div>
+					<div class="modal-body">
+						<p class="modal-message">Unesite novu šifru</p>
+						<div class="form-group">
+							<label>Nova šifra</label> 
+							<input id="password" type="password" class="form-control"/>
+						</div>
+                        <div class="form-group">
+                        	<label>Potvrdite šifru</label> 
+                        	<input id="passwordConfirm" type="password" class="form-control"/>
+                        </div>
+						<div id="divCheckPasswordMatch"></div>
+					</div>
+					
+					<div class="modal-footer">
+						<button type="button" class="btn btn-white" data-dismiss="modal">Otkaži</button>
+						<button id="confirmChangePass" type="button" class="btn btn-danger" disabled="disabled">Da, promijeni šifru</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+	
+	<footer layout:fragment="ui-footer">
+		<script th:inline="javascript">
+		/*<![CDATA[*/
+		    var allowEdit = [[${#httpServletRequest.isUserInRole('ROLE_EDIT_USERS')}]];
+			var allowView = [[${#httpServletRequest.isUserInRole('ROLE_VIEW_USERS')}]];		 
+			
+			$(document).ready(function() {
+				var table = $('.dataTables-users').DataTable({
+                	pageLength: 10,
+                	responsive: true,
+                	serverSide: true,
+                	ajax: {
+                		url: '/users/data',
+                		contentType: 'application/json',
+                		type: 'POST',
+                		data: function(data) {
+                			return data = JSON.stringify(data);
+                		}
+                	},
+                	dom: '<"row"<"col-sm-9"<"btn-group table-toolbar"B>><"col-sm-3"f>><"table-responsive"rt>lp',
+                	order: [[1, "asc"]],
+                	columnDefs: [{
+                		orderable: false, targets: [0, 3, 4]
+                	}, {
+                		searchable: false, targets: [0, 3, 4]
+                	}, {
+                		className: "text-center", targets: [3]
+                	}, {
+                		className: "text-right", targets: [4]
+                	}],
+                	columns: [{
+                		data: 'id',
+                		render: renderCheckbox
+                	}, {
+                		data: 'name'
+                	}, {
+                		data: 'email',
+                		render: renderEmail
+                	}, {
+                		data: 'enabled',
+						render: renderStatus
+                	}, {
+                		data: 'id',
+                		render: renderActions
+                	}],
+                	buttons: [{
+                    	text: 'Novi korisnik',
+                    	className: 'btn-sm',
+                    	action: actionNewUser
+                    }, {
+                    	text: 'Obriši',
+                    	className: 'btn-sm',
+                    	action: actionDelete
+                    }, {
+                    	text: 'Blokiraj',
+                    	className: 'btn-sm',
+                    	action: actionDisable
+                    }],
+                    drawCallback: function(settings) {
+                    	$('.i-checks').iCheck({
+                            checkboxClass: 'icheckbox_square-green',
+                            radioClass: 'iradio_square-green',
+                        });
+                    }
+                });		
+				
+				if(!allowEdit && allowView) {
+					table.buttons().disable();
+				}
+				
+				$("#password").keyup(checkPasswordMatch);
+				$("#passwordConfirm").keyup(checkPasswordMatch);
+			});
+		
+			function renderCheckbox(data, type, row) {
+    			return '<input type="checkbox" class="data-check i-checks" id="' + data + '">';
+    		}
+						
+			function renderEmail(data, type, row) {
+				return '<a href="mailto:' + row.email + '" title="Pošalji email korisniku">' + row.email + '</a>';		
+			}
+
+			function renderStatus(data, type, row) {
+				var a = '';
+				if (data) {
+					a += '<a href="#" data-toggle="modal" data-target="#modalDisable" data-userid="' + row.id + '" data-username="' + row.unit.name + '" title="Blokiraj"';
+					if(!allowEdit && allowView) {
+						a +=' style="pointer-events:none; opacity:0.6;" ';	
+					}
+					a += '><i class="fa fa-check text-navy"></i></a>';
+				} else {
+					a += '<a href="#" onclick=enableUser("' + row.id + '") title="Odblokiraj"';
+					if(!allowEdit && allowView) {
+						a +=' style="pointer-events:none; opacity:0.6;" ';	
+					}
+					a += '><i class="fa fa-ban text-danger"></i></a>';
+				}									
+				return a;
+			}
+			
+			function renderActions(data, type, row) {
+				var html = '';
+				
+				html += ' <a href="/users/' + data + '" href="#" title="Uredi"><i class="fa fa-pencil text-navy"></i></a>';
+				html += ' <a href="#" data-toggle="modal" data-target="#modalChangePassword" data-userid="' + data + '" data-username="' + row.email + '" title="Promijeni šifru"><i class="fa fa-edit text-navy"></i></a>';
+				html += ' <a href="#" data-toggle="modal" data-target="#modalDelete" data-userid="' + data + '" data-username="' + row.unit.name + '" title="Obriši" ';
+				
+				if(!allowEdit && allowView) {
+					html +=' style="pointer-events:none; opacity:0.6;" ';	
+				}
+
+				html +='><i class="fa fa-trash text-navy"></i></a>';				
+    			return html;
+    		}
+			
+			function refreshTable() {
+				$('.dataTables-users').DataTable().ajax.reload();
+			}
+			
+			function actionNewUser() {
+				location.href='/users/newUser';
+			}
+			
+			function actionDelete() {
+				if ($(".data-check:checked").length > 0) {
+					$('#modalDelete').modal('show');
+				}
+			}
+			
+			function actionDisable() {
+				if ($(".data-check:checked").length > 0) {
+					$('#modalDisable').modal('show');
+				}
+			}
+			
+			function deleteUsers(data) {
+				$('#modalDelete').modal('hide');
+				
+				var ids = [];
+				if (data) {
+					ids.push(data);
+				} else {
+					$(".data-check:checked").each(function() {
+						var id = this["id"] + "";
+						ids.push(id);
+					});
+				}
+				
+				if (ids.length > 0) {
+					$.ajax({
+						url: '/users/' + ids,
+						type: 'DELETE',
+						success: function() {
+							refreshTable();
+							toastr.success('Korisnik je obrisan.');
+						},
+						error: function() {
+							refreshTable();
+							toastr.error('Desio se problem prilikom brisanja. Pokušajte ponovno.');
+						}
+					});
+				}
+			}
+			
+			function disableUsers(data) {
+				$('#modalDisable').modal('hide');
+				
+				var ids = [];
+				if (data) {
+					ids.push(data);
+				} else {
+					$(".data-check:checked").each(function() {
+						var id = this["id"] + "";
+						ids.push(id);
+					});
+				}
+				
+				if (ids.length > 0) {
+					$.ajax({
+						url: '/users/' + ids + '/disable',
+						type: 'PUT',
+						success: function() {
+							refreshTable();
+							toastr.success('Korisnik je blokiran.');
+						},
+						error: function() {
+							refreshTable();
+							toastr.error('Desio se problem prilikom blokiranja. Pokušajte ponovno.');
+						}
+					});
+				}
+			}
+			
+			function enableUser(data) {
+				$.ajax({
+					url: '/users/' + data + '/enable',
+					type: 'PUT',
+					success: function() {
+						refreshTable();
+						toastr.success('Korisnik je odblokiran.');
+					},
+					error: function() {
+						refreshTable();
+						toastr.error('Desio se problem prilikom odblokiranja. Pokušajte ponovno.');
+					}
+				});
+			}
+			
+			function changePassword(data) {
+				$('#modalChangePassword').modal('hide');							
+				
+				$.ajax({
+					url: '/users/' + data + '/changePassword',
+					data: {	password: $('#password').val() },
+					type: 'PUT',
+					success: function() {						
+						toastr.success('Šifra je promijenjena.');
+					},
+					error: function(err) {	
+						var notificationMsg = 'Desio se problem prilikom promjene šifre. Pokušajte ponovno.'
+						
+						var excp = JSON.parse(err.responseText).exception;											
+						if(excp.match('MailSendException')) {
+							notificationMsg = 'Desio se problem. Šifra je promijenjena, ali nije poslana poruka na korisnikov email.'
+						}
+						toastr.error(notificationMsg);
+					}
+				});
+			}
+			
+			function checkPasswordMatch() {
+			    var password = $("#password").val();
+			    var confirmPassword = $("#passwordConfirm").val();
+			    var confirmBtn = $('#confirmChangePass');
+			    
+			    if (password != confirmPassword) {
+			    	$("#divCheckPasswordMatch").html("Šifre se ne podudaraju.");
+			    	$('#confirmChangePass').attr('disabled',"disabled");
+			    } else {
+			    	$("#divCheckPasswordMatch").html("Šifre se podudaraju.");			   
+			    	 document.getElementById("confirmChangePass").removeAttribute("disabled");
+			    }
+			        
+			}
+			
+			$('#modalDelete').on('show.bs.modal', function (event) {
+				var target = $(event.relatedTarget);
+				var id = target.data('userid');
+				
+				var modal = $(this);
+				
+				if (id) {
+					modal.find('#confirmButton')[0].setAttribute('onclick', 'deleteUsers(' + id + ')');
+				} else {
+					modal.find('#confirmButton')[0].setAttribute('onclick', 'deleteUsers()');
+				}
+				
+				modal.find('.modal-message').text('Da li ste sigurni da želite obrisati?');
+			})
+			
+			$('#modalDisable').on('show.bs.modal', function (event) {
+				var target = $(event.relatedTarget);
+				var id = target.data('userid');
+				
+				var modal = $(this);
+				
+				if (id) {
+					modal.find('#confirmButton')[0].setAttribute('onclick', 'disableUsers(' + id + ')');
+				} else {
+					modal.find('#confirmButton')[0].setAttribute('onclick', 'disableUsers()');
+				}
+				
+				modal.find('.modal-message').text('Da li ste sigurni da želite blokirati?');
+			})
+			
+			$('#modalChangePassword').on('show.bs.modal', function (event) {
+				var target = $(event.relatedTarget);
+				var id = target.data('userid');
+				var email = target.data('username');
+				
+				var modal = $(this);
+			
+				modal.find('#confirmChangePass')[0].setAttribute('onclick', 'changePassword(' + id + ')');
+				
+				if (email) {
+					modal.find('.modal-message').text('Upišite novu šifru ako želite promijeniti šifru od korisnika "' + email + '"');
+				} 
+			})
+		
+			$('#modalChangePassword').on('hidden.bs.modal', function (e) {
+				var modal = $(this);
+				modal.find("input").val('').end();
+				modal.find('#confirmChangePass')[0].setAttribute('disabled', 'disabled');				
+			})
+        /*]]>*/ 
+        </script>	
+	</footer>
+	
+</html>

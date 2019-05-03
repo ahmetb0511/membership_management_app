@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en"
+	xmlns="http://www.w3.org/1999/xhtml" 
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" 
+	layout:decorator="layout">
+
+	<body layout:fragment="ui-body">
+		<div class="row wrapper border-bottom white-bg page-heading">
+			<div class="col-lg-12">
+				<h2>Izvještaj</h2>
+			</div>
+		</div>
+		<div class="wrapper wrapper-content">			
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="ibox float-e-margins">
+						<div class="ibox-title">
+							<h5>Izvještaj</h5>
+						</div>
+						<div class="ibox-content">
+							<table class="table table-striped dataTables-reports">
+								<thead>
+									<tr>
+										<th>Korisnik</th>
+										<th>Džemat</th>
+										<th>Vrsta uplate</th>
+										<th>Iznos</th>
+										<th>Datum uplate</th>
+									</tr>
+								</thead>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>		
+		</div>
+	</body>
+	
+	<footer layout:fragment="ui-footer">
+		<script th:inline="javascript">
+		/*<![CDATA[*/	
+			$(document).ready(function() {
+				$('.dataTables-reports').DataTable({
+                	pageLength: 10,
+                	responsive: true,
+                	serverSide: true,
+                	ajax: {
+                		url: '/reports/data',
+                		contentType: 'application/json',
+                		type: 'POST',
+                		data: function(data) {
+                			return data = JSON.stringify(data);
+                		}
+                	},
+                	dom: '<"row"<"col-sm-9"<"btn-group table-toolbar"B>><"col-sm-3"f>><"table-responsive"rt>lp',
+                	order: [[1, "asc"]],
+                	columnDefs: [{
+                		orderable: false, targets: [4]
+                	}, {
+                		searchable: false, targets: [4]
+                	}, {
+                		className: "text-center", targets: [3, 4]
+                	}],
+                	columns: [{
+                		data: 'user.name'
+                	}, {
+                		data: 'unit.name'
+                	},{
+                		data: 'feeType.name'
+                	},{
+                		data: 'feeType.price'
+                	},{
+                		data: 'timeAdded',
+                		render: function(data) {
+                			return moment(data).format('DD.MM.YYYY HH:mm');
+                		}
+                	}],
+                	buttons: [],
+                    drawCallback: function(settings) {
+                    	$('.i-checks').iCheck({
+                            checkboxClass: 'icheckbox_square-green',
+                            radioClass: 'iradio_square-green',
+                        });
+                    }
+                });	
+			});
+        /*]]>*/ 
+        </script>	
+	</footer>
+	
+</html>

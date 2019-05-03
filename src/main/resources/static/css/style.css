@@ -1,0 +1,12 @@
+div.dataTables_length select{
+	width: 40% !important;
+	padding:0px; 
+}
+
+.required-field {
+	color: red;
+}
+
+.collapse:not(.show) {
+	display: flex;
+}

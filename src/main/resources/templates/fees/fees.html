@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en"
+	xmlns="http://www.w3.org/1999/xhtml" 
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" 
+	layout:decorator="layout">
+
+	<body layout:fragment="ui-body">
+		<div class="row wrapper border-bottom white-bg page-heading">
+			<div class="col-lg-12">
+				<h2>Uplate</h2>
+			</div>
+		</div>
+		<div class="wrapper wrapper-content">			
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="ibox float-e-margins">
+						<div class="ibox-title">
+							<h5>Uplate</h5>
+						</div>
+						<div class="ibox-content">
+							<table class="table table-striped dataTables-fees">
+								<thead>
+									<tr>
+										<th>&nbsp;</th>
+										<th>Džemat</th>
+										<th>Korisnik</th>
+										<th>Vrsta uplate</th>
+										<th>Datum uplate</th>
+										<th class="text-right">Akcije</th>
+									</tr>
+								</thead>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>		
+		</div>
+		
+	</body>
+	
+	<footer layout:fragment="ui-footer">
+		<script th:inline="javascript">
+		/*<![CDATA[*/
+			var allowEdit = [[${#httpServletRequest.isUserInRole('ROLE_EDIT_FEES')}]];
+			var allowView = [[${#httpServletRequest.isUserInRole('ROLE_VIEW_FEES')}]];
+			
+			$(document).ready(function() {
+				var table = $('.dataTables-fees').DataTable({
+                	pageLength: 10,
+                	responsive: true,
+                	serverSide: true,
+                	ajax: {
+                		url: '/fees/data',
+                		contentType: 'application/json',
+                		type: 'POST',
+                		data: function(data) {
+                			return data = JSON.stringify(data);
+                		}
+                	},
+                	dom: '<"row"<"col-sm-9"<"btn-group table-toolbar"B>><"col-sm-3"f>><"table-responsive"rt>lp',
+                	order: [[0, "asc"]],
+                	columnDefs: [{
+                		orderable: false, targets: [0, 4, 5]
+                	}, {
+                		searchable: false, targets: [0, 4, 5]
+                	}, {
+                		className: "text-center", targets: [0, 4]
+                	}, {
+                		className: "text-right", targets: [5]
+                	}],
+                	columns: [{
+                		data: 'id',
+                		width: '50px'
+                	}, {
+                		data: 'unit.name'
+                	}, {
+                		data: 'user.name'
+                	}, {
+                		data: 'feeType.name'
+                	}, {
+                		data: 'timeAdded',
+                		render: function(data) {
+                			return moment(data).format('DD.MM.YYYY HH:mm');
+                		}
+                	}, {
+                		data: 'id',
+                		render: renderActions,
+                		width: '70px'
+                	}],
+                	buttons: [{
+                    	text: 'Nova uplata',
+                    	className: 'btn-sm',
+                    	action: actionNewFee
+                    }],
+                    drawCallback: function(settings) {
+                    	$('.i-checks').iCheck({
+                            checkboxClass: 'icheckbox_square-green',
+                            radioClass: 'iradio_square-green',
+                        });
+                    }
+                });
+				
+				if(!allowEdit && allowView) {
+					table.buttons().disable();
+				}
+			});		
+
+			
+			function renderActions(data, type, row) {
+				var html = '';
+				if(allowEdit && allowView) {
+					html += ' <a href="/fees/' + data + '" href="#" title="Uredi"><i class="fa fa-pencil text-navy"></i></a>';
+				}
+				return html;
+    		}
+			
+			function refreshTable() {
+				$('.dataTables-fees').DataTable().ajax.reload();
+			}
+			
+			function actionNewFee() {
+				location.href='/fees/newFee';
+			}
+
+        /*]]>*/ 
+        </script>	
+	</footer>
+	
+</html>

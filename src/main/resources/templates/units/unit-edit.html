@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en"
+	xmlns="http://www.w3.org/1999/xhtml" 
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" 
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	layout:decorator="layout">
+	
+	<body layout:fragment="ui-body">
+		<div class="row wrapper border-bottom white-bg page-heading">
+			<div class="col-lg-12">
+				<h2>Džemati</h2>
+				<ol class="breadcrumb">
+					<li>
+						<a href="/units">Džemat</a>
+					</li>
+					<p>&nbsp; - &nbsp;</p>
+					<li class="active">
+						<strong th:unless="${unitForm.id}">Novi džemat</strong>
+						<strong th:if="${unitForm.id}">Uređivanje</strong>						
+					</li>
+				</ol>
+			</div>
+		</div>
+		
+		<div class="wrapper wrapper-content">		
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="ibox float-e-margins">
+						<div class="ibox-title">
+							<h5 th:unless="${unitForm.id}">Novi džemat</h5>
+							<h5 th:if="${unitForm.id}">Uređivanje</h5>
+						</div>
+						<div class="ibox-content">
+							<form id="unitForm" th:object="${unitForm}" method="post" class="form-horizontal">
+								<input type="hidden" th:field="*{id}" />
+								<div class="row">
+									<div class="col-sm-6">
+										<div th:classappend="${#fields.hasErrors('name')} ? has-error" class="form-group">
+											<label class="col-sm-3 control-label">Ime <span class="required-field">*</span> </label>
+											<div class="col-sm-9">
+												<input th:field="*{name}" type="text" class="form-control" th:maxlength="100"/>
+												<label th:if="${#fields.hasErrors('name')}" class="control-label" for="name">
+													<i class="fa fa-times-circle-o"></i> <span th:errors="*{name}">Required</span>
+												</label>
+											</div>
+										</div>
+										<div th:classappend="${#fields.hasErrors('supportEmail')} ? has-error" class="form-group">
+											<label class="col-sm-3 control-label">Email <span class="required-field">*</span> </label>
+											<div class="col-sm-9">
+												<input type="text" class="form-control" th:field="*{supportEmail}" th:maxlength="120" />
+												<label th:if="${#fields.hasErrors('supportEmail')}" class="control-label" for="supportEmail">
+													<i class="fa fa-times-circle-o"></i> <span th:errors="*{supportEmail}">Required</span>
+												</label>
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="col-sm-2 control-label">Status</label>
+											<div class="col-md-6">
+												<select class="form-control m-b" th:field="*{enabled}">
+													<option value="true">Aktivan</option>
+													<option value="false">Blokiran</option>
+												</select>
+											</div>
+										</div>
+									</div>										
+								</div>
+								<div class="row">
+									<div class="col-sm-6">	
+										<div class="form-group">
+											<div class="col-sm-9 col-sm-offset-3">
+												<button class="btn btn-primary" type="submit">Spremi</button>													
+												<a class="btn btn-white" th:href="@{/units}">Otkaži</a>                                       			 
+											</div>
+										</div>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>			
+		</div>	
+	</body>	
+	
+	<footer layout:fragment="ui-footer">
+		<script th:inline="javascript">
+		/*<![CDATA[*/		   
+		   
+		/*]]>*/ 
+        </script>
+	</footer>
+</html>

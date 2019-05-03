@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en"
+	xmlns="http://www.w3.org/1999/xhtml" 
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" 
+	layout:decorator="layout">
+
+	<body layout:fragment="ui-body">
+		<div class="row wrapper border-bottom white-bg page-heading">
+			<div class="col-lg-12">
+				<h2>Džemati</h2>
+			</div>
+		</div>
+		<div class="wrapper wrapper-content">			
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="ibox float-e-margins">
+						<div class="ibox-title">
+							<h5>Džemati</h5>
+						</div>
+						<div class="ibox-content">
+							<table class="table table-striped dataTables-units">
+								<thead>
+									<tr>
+										<th>&nbsp;</th>
+										<th>Ime</th>
+										<th>Email</th>
+										<th>Status</th>
+										<th class="text-right">Akcije</th>
+									</tr>
+								</thead>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>		
+		</div>
+		
+		<!--Confirmation Delete dialog -->
+		<div class="modal inmodal fade" id="modalDelete" tabindex="-1" role="dialog"  aria-hidden="true">
+			<div class="modal-dialog modal-sm">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Zatvori</span></button>
+						<h4 class="modal-title">Obriši džemat</h4>
+					</div>
+					<div class="modal-body">
+						<p class="modal-message">Da li ste sigurni da želite obrisati označeni džemat?</p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-white" data-dismiss="modal">Otkaži</button>
+						<button id="confirmButton" type="button" class="btn btn-danger">Da, obriši</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!--Confirmation Disable dialog -->
+		<div class="modal inmodal fade" id="modalDisable" tabindex="-1" role="dialog"  aria-hidden="true">
+			<div class="modal-dialog modal-sm">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Zatvori</span></button>
+						<h4 class="modal-title">Blokiraj džemat</h4>
+					</div>
+					<div class="modal-body">
+						<p class="modal-message">Da li ste sigurni da želite blokirati označeni džemat?</p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-white" data-dismiss="modal">Otkaži</button>
+						<button id="confirmButton" type="button" class="btn btn-warning">Da, blokiraj</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+	</body>
+	
+	<footer layout:fragment="ui-footer">
+		<script th:inline="javascript">
+		/*<![CDATA[*/
+			var allowEdit = [[${#httpServletRequest.isUserInRole('ROLE_EDIT_UNITS')}]];
+			var allowView = [[${#httpServletRequest.isUserInRole('ROLE_VIEW_UNITS')}]];
+			
+			$(document).ready(function() {
+				var table = $('.dataTables-units').DataTable({
+                	pageLength: 10,
+                	responsive: true,
+                	serverSide: true,
+                	ajax: {
+                		url: '/units/data',
+                		contentType: 'application/json',
+                		type: 'POST',
+                		data: function(data) {
+                			return data = JSON.stringify(data);
+                		}
+                	},
+                	dom: '<"row"<"col-sm-9"<"btn-group table-toolbar"B>><"col-sm-3"f>><"table-responsive"rt>lp',
+                	order: [[1, "asc"]],
+                	columnDefs: [{
+                		orderable: false, targets: [0, 3, 4]
+                	}, {
+                		searchable: false, targets: [0, 3, 4]
+                	}, {
+                		className: "text-center", targets: [3]
+                	}, {
+                		className: "text-right", targets: [4]
+                	}],
+                	columns: [{
+                		data: 'id',
+                		render: renderCheckbox
+                	}, {
+                		data: 'name'
+                	}, {
+                		data: 'supportEmail',
+                		render: renderEmail
+                	}, {
+                		data: 'enabled',
+						render: renderStatus
+                	}, {
+                		data: 'id',
+                		render: renderActions
+                	}],
+                	buttons: [{
+                    	text: 'Novi džemat',
+                    	className: 'btn-sm',
+                    	action: actionNewUnit
+                    }, {
+                    	text: 'Obriši',
+                    	className: 'btn-sm',
+                    	action: actionDelete
+                    }, {
+                    	text: 'Blokiraj',
+                    	className: 'btn-sm',
+                    	action: actionDisable
+                    }],
+                    drawCallback: function(settings) {
+                    	$('.i-checks').iCheck({
+                            checkboxClass: 'icheckbox_square-green',
+                            radioClass: 'iradio_square-green',
+                        });
+                    }
+                });
+				
+				if(!allowEdit && allowView) {
+					table.buttons().disable();
+				}
+			});
+		
+			function renderCheckbox(data, type, row) {
+    			return '<input type="checkbox" class="data-check i-checks" id="' + data + '">';
+    		}			
+
+			function renderEmail(data, type, row) {
+				return '<a href="mailto:'+row.supportEmail+'" title="Pošalji email džematu">'+row.supportEmail+'</a>';		
+			}
+			
+			function renderStatus(data, type, row) {				
+				if (data) {
+					return '<a href="#" data-toggle="modal" data-target="#modalDisable" data-unitid="' + row.id + '" data-unitname="' + row.name + '" title="Blokiraj džemat"><i class="fa fa-check text-navy"></i></a>';					
+				}
+				return '<a href="#" onclick=enableUnit("' + row.id + '") title="Odblokiraj džemat"><i class="fa fa-ban text-danger"></i></a>';				 					
+			}
+			
+			function renderActions(data, type, row) {
+				var html = '';
+				
+				html += ' <a href="/units/' + data + '" href="#" title="Uredi"><i class="fa fa-pencil text-navy"></i></a>';
+				html += ' <a href="#" data-toggle="modal" data-target="#modalDelete" data-unitid="' + data + '" data-unitname="' + row.name + '" title="Obriši"><i class="fa fa-trash text-navy"></i></a>';				
+    			return html;
+    		}
+			
+			function refreshTable() {
+				$('.dataTables-units').DataTable().ajax.reload();
+			}
+			
+			function actionNewUnit() {
+				location.href='/units/newUnit';
+			}
+			
+			function actionDelete() {
+				if ($(".data-check:checked").length > 0) {
+					$('#modalDelete').modal('show');
+				}
+			}
+			
+			function actionDisable() {
+				if ($(".data-check:checked").length > 0) {
+					$('#modalDisable').modal('show');
+				}
+			}
+			
+			function deleteUnits(data) {
+				$('#modalDelete').modal('hide');
+				
+				var ids = [];
+				if (data) {
+					ids.push(data);
+				} else {
+					$(".data-check:checked").each(function() {
+						var id = this["id"] + "";
+						ids.push(id);
+					});
+				}
+				
+				if (ids.length > 0) {
+					$.ajax({
+						url: '/units/' + ids,
+						type: 'DELETE',
+						success: function() {
+							refreshTable();
+							toastr.success('Džemat(i) je obrisan.');
+						},
+						error: function() {
+							refreshTable();
+							toastr.error('Desio se problem prilikom brisanja džemata. Pokušajte ponovno.');
+						}
+					});
+				}
+			}
+			
+			function disableUnits(data) {
+				$('#modalDisable').modal('hide');
+				
+				var ids = [];
+				if (data) {
+					ids.push(data);
+				} else {
+					$(".data-check:checked").each(function() {
+						var id = this["id"] + "";
+						ids.push(id);
+					});
+				}
+				
+				if (ids.length > 0) {
+					$.ajax({
+						url: '/units/' + ids + '/disable',
+						type: 'PUT',
+						success: function() {
+							refreshTable();
+							toastr.success('Džemat(i) je blokiran.');
+						},
+						error: function() {
+							refreshTable();
+							toastr.error('Desio se problem prilikom blokiranja džemata. Pokušajte ponovno.');
+						}
+					});
+				}
+			}
+			
+			function enableUnit(data) {
+				$.ajax({
+					url: '/units/' + data + '/enable',
+					type: 'PUT',
+					success: function() {
+						refreshTable();
+						toastr.success('Džemat je odblokiran.');
+					},
+					error: function() {
+						refreshTable();
+						toastr.error('Desio se problem prilikom odblokiranja džemata. Pokušajte ponovno.');
+					}
+				});
+			}
+			
+			$('#modalDelete').on('show.bs.modal', function (event) {
+				var target = $(event.relatedTarget);
+				var id = target.data('unitid');
+				
+				var modal = $(this);
+				
+				if (id) {
+					modal.find('#confirmButton')[0].setAttribute('onclick', 'deleteUnits(' + id + ')');
+				} else {
+					modal.find('#confirmButton')[0].setAttribute('onclick', 'deleteUnits()');
+				}
+				
+				modal.find('.modal-message').text('Da li ste sigurni da želite obrisati označeni džemat(e)?');
+			})
+			
+			$('#modalDisable').on('show.bs.modal', function (event) {
+				var target = $(event.relatedTarget);
+				var id = target.data('unitid');
+				
+				var modal = $(this);
+				
+				if (id) {
+					modal.find('#confirmButton')[0].setAttribute('onclick', 'disableUnits(' + id + ')');
+				} else {
+					modal.find('#confirmButton')[0].setAttribute('onclick', 'disableUnits()');
+				}
+				
+				modal.find('.modal-message').text('Da li ste sigurni da želite blokirati označeni džemat(e)?');
+			})
+        /*]]>*/ 
+        </script>	
+	</footer>
+	
+</html>

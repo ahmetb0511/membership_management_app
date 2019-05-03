@@ -1,0 +1,17 @@
+logging:
+  level:
+    com.mma: debug
+    org.hibernate.SQL: debug
+
+spring:
+  datasource:
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql:///membership_management_app?autoReconnect=true&useUnicode=true&characterEncoding=utf-8
+    username: root
+    password: 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    protocol: smtp
+    username: mma@gmail.com
+    password: mma_sifra

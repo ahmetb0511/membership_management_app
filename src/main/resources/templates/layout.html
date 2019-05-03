@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<title>Membership Management App</title>
+		<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport" />
+		
+		<!-- Font awesome -->
+		<link th:href="@{/assets/fontawesome/css/all.css}" rel="stylesheet" />
+		
+		<!-- Inspinia -->
+		<link th:href="@{/assets/inspinia/font-awesome/css/font-awesome.css}" rel="stylesheet" />
+		<link th:href="@{/assets/inspinia/css/bootstrap.min.css}" rel="stylesheet" />
+		<link th:href="@{/assets/inspinia/css/animate.css}" rel="stylesheet" />
+		<link th:href="@{/assets/inspinia/css/plugins/iCheck/custom.css}" rel="stylesheet" />
+		<link th:href="@{/assets/inspinia/css/plugins/dataTables/datatables.min.css}" rel="stylesheet" />
+		<link id="loadBefore" th:href="@{/assets/inspinia/css/style.css}" rel="stylesheet" />
+		
+		<!-- Toastr style -->
+		<link th:href="@{/assets/inspinia/css/plugins/toastr/toastr.min.css}" rel="stylesheet" />
+		
+		<!--  Multiple select chosen -->
+		<link th:href="@{/assets/inspinia/css/plugins/chosen/chosen.css}" rel="stylesheet" />
+		
+		<!--  Date picker -->
+		<link th:href="@{/assets/inspinia/css/plugins/datapicker/datepicker3.css}" rel="stylesheet" />
+		
+		<link th:href="@{/css/style.css}" rel="stylesheet" />
+	
+	</head>
+<body>
+	<div id="wrapper">
+
+		 <div class="side-navigation">
+
+			<nav class="navbar-default navbar-static-side" role="navigation">
+
+				<ul class="nav metismenu" id="side-menu" sec:authorize="hasRole('ADMINISTRATOR')">
+					<li class="nav-header"><a th:href="@{/}" class="navbar-brand">AEK</a></li>
+					<li sec:authorize="hasRole('ADMINISTRATOR')"
+						th:classappend="${beans.menuUI.itemClass(menuItem?:'','units')}">
+						<a aria-expanded="false" role="button" th:href="@{/units}"><i class="fas fa-mosque"></i>Džemati</a>
+					</li>
+					<li sec:authorize="hasRole('VIEW_USERS')"
+						th:classappend="${beans.menuUI.itemClass(menuItem?:'','users')}">
+						<a aria-expanded="false" role="button" th:href="@{/users}"><i class="fas fa-user"></i>Korisnici</a>
+					</li>
+					<li sec:authorize="hasRole('VIEW_FEE_TYPES')"
+						th:classappend="${beans.menuUI.itemClass(menuItem?:'','feeTypes')}">
+						<a aria-expanded="false" role="button" th:href="@{/feeTypes}"><i class="fas fa-file-invoice-dollar"></i>Vrste uplata</a>
+					</li>
+					<li sec:authorize="hasRole('VIEW_FEES')"
+						th:classappend="${beans.menuUI.itemClass(menuItem?:'','fees')}">
+						<a aria-expanded="false" role="button" th:href="@{/fees}"><i class="fas fa-receipt"></i>Uplate</a>
+					</li>
+					<li sec:authorize="hasRole('VIEW_REPORTS')"
+						th:classappend="${beans.menuUI.itemClass(menuItem?:'','reports')}">
+						<a aria-expanded="false" role="button" th:href="@{/reports}"><i class="fas fa-chart-pie"></i>Izvještaj</a>
+					</li>
+				</ul>
+				
+				<ul class="nav metismenu" sec:authorize="hasRole('MODERATOR')">
+					<li class="nav-header"><a th:href="@{/}" class="navbar-brand">AEK</a></li>
+					<li sec:authorize="hasRole('VIEW_USERS')"
+						th:classappend="${beans.menuUI.itemClass(menuItem?:'','users')}">
+						<a aria-expanded="false" role="button" th:href="@{/users}"><i class="fas fa-user"></i>Korisnici</a>
+					</li>
+					<li sec:authorize="hasRole('VIEW_FEE_TYPES')"
+						th:classappend="${beans.menuUI.itemClass(menuItem?:'','feeTypes')}">
+						<a aria-expanded="false" role="button" th:href="@{/feeTypes}"><i class="fas fa-file-invoice-dollar"></i>Vrste uplata</a>
+					</li>
+					<li sec:authorize="hasRole('VIEW_FEES')"
+						th:classappend="${beans.menuUI.itemClass(menuItem?:'','fees')}">
+						<a aria-expanded="false" role="button" th:href="@{/fees}"><i class="fas fa-receipt"></i>Uplate</a>
+					</li>
+					<li sec:authorize="hasRole('VIEW_REPORTS')"
+						th:classappend="${beans.menuUI.itemClass(menuItem?:'','reports')}">
+						<a aria-expanded="false" role="button" th:href="@{/reports}"><i class="fas fa-chart-pie"></i>Izvještaj</a>
+					</li>
+				</ul>
+				
+				<ul class="nav metismenu" sec:authorize="hasRole('USER')">
+					<li class="nav-header"><a th:href="@{/}" class="navbar-brand">AEK</a></li>
+					<li sec:authorize="hasRole('VIEW_FEES')"
+						th:classappend="${beans.menuUI.itemClass(menuItem?:'','fees')}">
+						<a aria-expanded="false" role="button" th:href="@{/fees}"><i class="fas fa-receipt"></i>Uplate</a>
+					</li>
+					<li sec:authorize="hasRole('VIEW_REPORTS')"
+						th:classappend="${beans.menuUI.itemClass(menuItem?:'','reports')}">
+						<a aria-expanded="false" role="button" th:href="@{/reports}"><i class="fas fa-chart-pie"></i>Izvještaj</a>
+					</li>
+				</ul>
+			</nav>
+		</div> 
+
+		<div id="page-wrapper" class="gray-bg">
+			<div class="top-navigation">
+				<div class="row border-bottom white-bg">
+					<nav class="navbar navbar-static-top" role="navigation">
+						<div class="navbar-collapse collapse" id="navbar">
+							<ul class="nav navbar-top-links navbar-right">
+								<li sec:authorize="hasAnyRole('PREVIOUS_ADMINISTRATOR', 'PREVIOUS_MODERATOR')"><a
+									href="/logout/impersonate"><i class="fa fa-arrow-left"></i>
+										Admin</a></li>
+								<li class="dropdown"><a aria-expanded="false" role="button"
+									href="#" class="dropdown-toggle" data-toggle="dropdown"> <span
+										sec:authentication="name"></span> <span
+										class="caret"></span></a>
+									<ul role="menu" class="dropdown-menu">
+										<li><a th:href="@{/myaccount}"><i class="fa fa-gear"></i>
+												Vaš profil</a></li>
+										<li role="separator" class="divider"></li>
+										<li><a href="/logout" style="padding-top: 0px;"><i
+												class="fa fa-sign-out"></i> Log out</a></li>
+									</ul></li>
+							</ul>
+						</div>
+					</nav>
+				</div>
+			</div>
+			<div layout:fragment="ui-body" th:remove="tag"></div>
+			<div class="footer">
+				<div>AEK &copy; 2019</div>
+			</div>
+		</div>
+	</div>
+
+	<script th:src="@{/assets/inspinia/js/jquery-2.1.1.js}"></script>
+	<script th:src="@{'/assets/inspinia/js/popper.min.js'}"></script>
+	<script th:src="@{/assets/inspinia/js/plugins/jquery-ui/jquery-ui.min.js}"></script>
+	<script th:src="@{/assets/inspinia/js/bootstrap.min.js}"></script>
+	<script th:src="@{/assets/inspinia/js/plugins/metisMenu/jquery.metisMenu.js}"></script>
+	<script th:src="@{/assets/inspinia/js/plugins/slimscroll/jquery.slimscroll.min.js}"></script>
+	<script th:src="@{/assets/inspinia/js/plugins/pace/pace.min.js}"></script>
+	<script th:src="@{/assets/inspinia/js/inspinia.js}"></script>
+	<script th:src="@{/assets/inspinia/js/plugins/iCheck/icheck.min.js}"></script>
+	<script th:src="@{/assets/inspinia/js/plugins/dataTables/datatables.min.js}"></script>
+	<script th:src="@{/assets/inspinia/js/plugins/toastr/toastr.min.js}"></script>
+	<script th:src="@{/assets/inspinia/js/plugins/chosen/chosen.jquery.js}"></script>
+	<script th:src="@{/assets/inspinia/js/plugins/datapicker/bootstrap-datepicker.js}"></script>
+	<script th:src="@{/assets/moment.js}"></script>
+	
+	<!-- ChartJS-->
+	<script th:src="@{/assets/inspinia/js/plugins/chartJs/Chart.min.js}"></script>
+
+	<div layout:fragment="ui-footer" th:remove="tag"></div>
+
+	<script>
+		$(document).ready(function() {
+			$('.i-checks').iCheck({
+				checkboxClass : 'icheckbox_square-green',
+				radioClass : 'iradio_square-green',
+			});
+		});
+	</script>
+
+</body>
+</html>

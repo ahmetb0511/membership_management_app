@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en"
+	xmlns="http://www.w3.org/1999/xhtml" 
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" 
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	layout:decorator="layout">
+	
+	<body layout:fragment="ui-body">
+		<div class="row wrapper border-bottom white-bg page-heading">
+			<div class="col-lg-12">
+				<h2>Korisnici</h2>
+				<ol class="breadcrumb">
+					<li>
+						<a href="/users">Korisnici</a>
+					</li>
+					<p>&nbsp; - &nbsp;</p>
+					<li class="active">
+						<strong th:unless="${userForm.id}" >Novi korisnik</strong>
+						<strong th:if="${userForm.id}">Uredi korisnika</strong>
+					</li>
+				</ol>
+			</div>
+		</div>
+		
+		<div class="wrapper wrapper-content">		
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="ibox float-e-margins">
+						<div class="ibox-title">
+							<h5 th:unless="${userForm.id}">Novi korisnik</h5>
+							<h5 th:if="${userForm.id}">Uredi korisnika</h5>
+						</div>
+						<div class="ibox-content">
+							<form id="userForm" th:object="${userForm}" method="post" class="form-horizontal">
+								<input type="hidden" th:field="*{id}" />
+								<input type="hidden" th:field="*{role}" />
+								<div class="row">
+									<div class="col-sm-6 b-r">
+										<div th:classappend="${#fields.hasErrors('name')} ? has-error" class="form-group">
+											<label class="col-sm-3 control-label">Ime i prezime<span class="required-field">*</span> </label>
+											<div class="col-sm-9">
+												<input th:field="*{name}" type="text" class="form-control" th:maxlength="100"/>
+												<label th:if="${#fields.hasErrors('name')}" class="control-label" for="name">
+													<i class="fa fa-times-circle-o"></i> <span th:errors="*{name}">Required</span>
+												</label>
+											</div>
+										</div>
+										<div th:classappend="${#fields.hasErrors('email')} ? has-error" class="form-group">
+											<label class="col-sm-3 control-label">E-mail <span class="required-field">*</span> </label>
+											<div class="col-sm-9">
+												<input type="text" class="form-control" th:field="*{email}" th:maxlength="120" th:readonly="${userForm.id}"/>
+												<label th:if="${#fields.hasErrors('email')}" class="control-label" for="email">
+													<i class="fa fa-times-circle-o"></i> <span th:errors="*{email}">Required</span>
+												</label>
+											</div>
+										</div>
+										<div th:classappend="${#fields.hasErrors('password')} ? has-error" class="form-group">
+											<label class="col-sm-3 control-label">Šifra <span class="required-field">*</span> </label>
+											<div class="col-sm-9">
+												<input id="pass" type="password" class="form-control" th:value="*{password}" name="password" th:readonly="${userForm.id}"/>
+												<label th:if="${#fields.hasErrors('password')}" class="control-label" for="password">
+													<i class="fa fa-times-circle-o"></i> <span th:errors="*{password}">Required</span>
+												</label>
+											</div>
+										</div>
+										<div th:classappend="${#fields.hasErrors('password2')} ? has-error" class="form-group">
+											<label class="col-sm-3 control-label">Ponovite šifru <span class="required-field">*</span> </label>
+											<div class="col-sm-9">
+												<input id="pass2" type="password" class="form-control" th:value="*{password2}" name="password2" th:readonly="${userForm.id}"/>
+												<label th:if="${#fields.hasErrors('password2')}" class="control-label" for="password2">
+													<i class="fa fa-times-circle-o"></i> <span th:errors="*{password2}">Required</span>
+												</label>
+											</div>
+										</div>
+									</div>
+									<div class="col-sm-6">
+										<div class="form-group">
+											<label class="col-sm-2 control-label">Status</label>
+											<div class="col-md-6">
+												<select class="form-control m-b" th:field="*{enabled}">
+													<option value="true">Aktivan</option>
+													<option value="false">Blokiran</option>
+												</select>
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="col-sm-2 control-label">Permisije</label>
+											<div class="col-sm-10">							                                    
+												<div class="table-responsive">
+													<table class="table table-bordered table-striped">
+														<thead>
+															<tr>
+																<th>Kategorija</th>
+																<th>Pregled</th>
+																<th>Uređivanje</th>																	
+															</tr>
+														</thead>
+														<tbody>
+															<tr th:each="right, stat : *{rights}">
+																<th>
+																	<span th:text="${right.category.value}"></span>
+																	<input th:field="*{rights[__${stat.index}__].category}" type="hidden"/>
+																</th>
+																<td><input th:field="*{rights[__${stat.index}__].view}" class="i-checks" type="checkbox"/></td>
+																<td><input th:field="*{rights[__${stat.index}__].edit}" class="i-checks" type="checkbox"/></td>																	
+															</tr>
+														</tbody>
+													</table>
+												</div>
+											</div>
+										</div>
+									</div>										
+								</div>
+								<div class="row">
+									<div class="col-sm-6">	
+										<div class="form-group">
+											<div class="col-sm-9 col-sm-offset-3">
+												<button class="btn btn-primary" type="submit">Spremi</button>													
+												<a class="btn btn-white" th:href="@{/users}">Otkaži</a>                                       			 
+											</div>
+										</div>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>			
+		</div>	
+		
+		<input id="allowEdit" type="hidden" th:value="${#httpServletRequest.isUserInRole('ROLE_EDIT_USERS')} ? true : false" />
+		<input id="allowView" type="hidden" th:value="${#httpServletRequest.isUserInRole('ROLE_VIEW_USERS')} ? true : false" />
+	</body>
+	
+	<footer layout:fragment="ui-footer">
+		<script th:inline="javascript">
+		/*<![CDATA[*/
+		    $(document).ready(function() {
+		        if($('#allowEdit').val() == "false" &&  $('#allowView').val() == "true") {
+		        	$("#userForm :input").prop("disabled", "disabled");
+				}
+		    });
+			
+			 $('.i-checks').on('ifChecked', function(event) {
+				// Permission table - if 'Edit' option is checked also check the 'View' option
+				var id = $(this).closest("input")[0].id;   
+				if(id.indexOf('edit') >= 0) {			 	
+					var editInput =  document.getElementById(id.replace('edit', 'view'));
+				 	$( $(editInput)[0]).iCheck('check');			 	 
+				}
+			});
+			 
+		/*]]>*/ 
+        </script>	
+	</footer>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Membership Management App | Login</title>
+		<link th:href="@{/assets/inspinia/css/bootstrap.min.css}" rel="stylesheet" />
+		<link th:href="@{/assets/inspinia/font-awesome/css/font-awesome.css}" rel="stylesheet" />
+		<link th:href="@{/assets/inspinia/css/animate.css}" rel="stylesheet" />
+		<link th:href="@{/assets/inspinia/css/style.css}" rel="stylesheet" />	
+		
+		<style>
+			.logo-name {
+				font-size: 110px !important;
+			}
+		</style>	
+	</head>
+
+	<body class="gray-bg">
+		<div class="middle-box text-center loginscreen animated fadeInDown">
+			<div>
+				<div>
+					<h5 class="logo-name">MMA</h5>
+				</div>
+				
+				<form id="login_form" th:action="@{/login}" th:method="post" class="m-t" role="form" action="index.html">
+					<p>Prijavi se na Membership Management App</p>
+					
+					<div id="error" th:if="${param.error}" class="alert alert-danger" role="alert">
+						<strong>Login neuspješan.</strong> Pogrešan email i šifra.
+					</div>
+					<div id="ok" th:if="${param.logout}" class="alert alert-success" role="alert">
+						Odjavili ste se.
+					</div>
+					
+					<div class="form-group">
+						<input th:name="username" type="text" class="form-control" placeholder="Email" required="required" />
+					</div>
+					<div class="form-group">
+						<input th:name="password" type="password" class="form-control" placeholder="Šifra" required="required" />
+					</div>
+					<button type="submit" class="btn btn-primary block full-width m-b">Login</button>
+				</form>
+				
+				<form style="display:none" id="pass_form">
+					<div id="info" class="alert alert-info" role="alert">
+						<strong>Ne možete se prijaviti?</strong><br/>Upišite email i dobit ćete link za kreiranje nove šifre na Vaš email.
+					</div>
+					
+					<div id="error" style="display: none;" class="alert alert-danger"></div>
+ 
+					<div id="ok" style="display: none;" class="alert alert-success"></div>
+					
+					<div class="form-group">
+						<input id="fpass_username" type="text" class="form-control" placeholder="Email" required="required" />
+					</div>
+					
+					<!-- <button type="submit" class="btn btn-primary block full-width m-b">Request New Password</button>  -->
+					<button id="forgotPassword" type="button" class="btn btn-primary block full-width m-b">Zatraži novu šifru</button><br/>
+				</form>
+				
+				<div class="links_b links_btm clearfix">
+					<span class="linkform">
+						<a href="#pass_form"><small>Zaboravili ste šifru?</small></a>
+					</span>
+					<span class="linkform" style="display:none">
+						Zaboravi, <a href="#login_form">vrati me na login stranicu</a>
+					</span>
+				</div>
+				<p class="m-t"> <small>AEK &copy; 2019</small> </p>
+			</div>
+		</div>
+		
+		<script th:src="@{/assets/inspinia/js/jquery-2.1.1.js}"></script>				
+	</body>
+	
+	<footer>
+		<script th:inline="javascript">
+		/*<![CDATA[*/	
+		  var form_wrapper = $('.loginscreen');
+		  $('.linkform a').on('click',function(e) {
+			var target = $(this).attr('href');
+			$(form_wrapper.find('form:visible')).hide();
+			
+			$('.links_btm .linkform').toggle();		
+			$(target).show();
+			
+			e.preventDefault();
+		});
+		  
+		  $("#pass_form").submit(function(e) {
+				submitForm();
+				e.preventDefault();
+		  });
+		  
+		$('#forgotPassword').on('click',function(e) {
+			submitForm();
+		});
+			
+		function submitForm() {
+			var email = $('#fpass_username').val();
+			$("#ok").hide();
+			$("#error").hide();
+			$("#info").hide();
+			$.ajax({
+				url : "/forgot-password",	
+				type: 'POST',				
+				data: { username: email },				
+				success : function(data) {	
+					for (var result in data) {
+						if (result == "ok") {
+							$("#ok").html(data[result]);
+							$("#ok").show();
+						} else {
+							$("#error").html(data[result]);
+							$("#error").show();
+						}	
+					}
+				},				
+				error : function() {
+					console.log("AJAX error: " + jqXHR + "\n " + textStatus + "\n "	+ errorThrown);
+				} 
+				
+			});
+		}
+		/*]]>*/ 
+        </script>	
+	</footer>
+</html>
